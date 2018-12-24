@@ -148,6 +148,7 @@
                     let cb = rect.bottom;
                     let dy = rect.top;
                     if(dy == 0){
+                        that.el.parentNode && that.el.parentNode.removeChild(that.el);
                         return;
                     }
                     let cy = dy + watcher.bulletSpeed;
