@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <!-- Tell the browser to be responsive to screen width -->
+        <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+        <style>
+            *{
+                padding:0;
+                margin:0;
+            }
+            html, body{
+                overflow: hidden;
+            }
+
+            #-box{
+                position: absolute;
+                left:0;
+                top: 0;
+            }
+
+            #gun{
+                position:absolute;
+                width: 50px;
+                height: 10px;
+                left: 50px;
+                bottom: 50px;
+                background:#0B7500;
+            }
+            .bullet{
+                position:absolute;
+                width: 4px;
+                height: 14px;
+                background:saddlebrown;
+                border-radius: 50%;
+            }
+            .bubble{
+                position: absolute;
+                display:inline-block;
+                border-radius: 50%;
+            }
+            #toolbar{
+                width: 30px;
+                position: absolute;
+                top: 100px;
+                right: 0;
+                height:40px;
+                text-align: center;
+            }
+            #toolbar button{
+                width: 30px;
+                height:50px;
+                margin-top:20px;
+                text-align:center;
+            }
+        </style>
+    </head>
+
+    <body>
+        <p id="score-box">score:<span id="score">0</span></p>
+        <div id="gun"></div>
+        <div id="toolbar">
+            <button type="button" id="btn-begin">开始</button>
+            <button type="button" id="btn-pause">暂停</button>
+            <button type="button" id="btn-restart">重开</button>
+        </div>
+    </body>
+    <script>
+
+        let scorer = document.querySelector("#score");
+        let gun = document.querySelector("#gun");
+        let gunRect = gun.getBoundingClientRect();
+
+
+        let hMax = window.innerWidth;
+
+        let initLeft = (hMax - gunRect.width ) / 2;
+
+        gun.style.left = initLeft + 'px';
+
+        let btnStart = document.querySelector('#btn-begin');
+        let btnPause = document.querySelector('#btn-pause');
+        let btnRestart = document.querySelector('#btn-restart');
+
+        // 开始
+        btnStart.addEventListener('click', function(e){
+            let watcher = new Watcher();
+            watcher.begin();
+        })
+
+        // 暂停
+        btnPause.addEventListener('click', function(e){
+            cancelAnimationFrame(timer);
+        })
+
+        // 重开
+        btnRestart.addEventListener('click', function(e){
+            score = 0;
+            cancelAnimationFrame(timer);
+        })
+
+        gun.ontouchstart = function (e) {
+            var that = this;
+            var ix = e.touches[0].clientX;
+            console.log(ix)
+            var ox = this.getBoundingClientRect().x;
+            document.ontouchmove = function (e) {
+                var cx = e.touches[0].clientX;
+                var dx = cx - ix;
+                that.style.left = (ox + dx) + 'px';
+
+                document.ontouchend = function (e) {
+                    document.onmousemove = null
+                    document.onmouseup = null
+                }
+            }
+        }
+
+        // 监听手机Y轴方向的转动，水平移动手杆 #gun
+        window.addEventListener('deviceorientation',function (e) {
+            let cx = initLeft + e.gamma * 10;
+            gun.style.left = Math.max(-10, Math.min(cx, hMax - 50 + 10)) + 'px';
+        })
+
+
+
+        // 构造子弹
+        const Bullet = function () {
+            this.timer = null;
+            this.el = null;
+            this.run = function (watcher, allBubbles) {
+                let that = this;
+
+                this.timer = setInterval(function () {
+                    let rect = that.el.getBoundingClientRect();
+                        let cx = rect.x;
+                        let cr = rect.right;
+                        let cb = rect.bottom;
+                        let cy = rect.top + watcher.bulletSpeed;
+                        that.el.style.top = cy + 'px';
+
+                        for(let i = 0, len = allBubbles.all.length; i < len; i++) {
+                            let bubblei = allBubbles.all[i];
+                            let _rect = bubblei.el.getBoundingClientRect();
+                            if (cy <= _rect.bottom && cx > _rect.x - 5 && cr < _rect.right + 5) {
+                                console.log('击中！');
+                                bubblei.el.parentNode && bubblei.el.parentNode.removeChild(bubblei.el);
+                                that.el.parentNode && that.el.parentNode.removeChild(that.el);
+                                // allBubbles.all.splice(bubblei);
+                                watcher.record();
+                                clearInterval(that.timer);
+                                break;
+                            }
+                        }
+
+                        if (cb < -14) {
+                            that.el.parentNode.removeChild(that.el);
+                            clearInterval(that.timer);
+                        }
+                }, 50)
+
+                // cancelAnimationFrame(this.timer);
+                // this.timer = requestAnimationFrame(function init(){
+                //     let rect = that.el.getBoundingClientRect();
+                //     let cx = rect.x;
+                //     let cr = rect.right;
+                //     let cb = rect.bottom;
+                //     let cy = rect.top + watcher.bulletSpeed;
+                //     that.el.style.top = cy + 'px';
+                //
+                //     for(let i = 0, len = allBubbles.all.length; i < len; i++) {
+                //         let bubblei = allBubbles.all[i];
+                //         let _rect = bubblei.el.getBoundingClientRect();
+                //
+                //         if (cy <= _rect.bottom && cx > _rect.x - 5 && cr < _rect.right + 5) {
+                //             console.log(cy <= _rect.bottom, cx > _rect.x - 5, cr < _rect.right + 5);
+                //             bubblei.el.parentNode && bubblei.el.parentNode.removeChild(bubblei.el);
+                //             that.el.parentNode && that.el.parentNode.removeChild(that.el);
+                //             console.log('击中！');
+                //             allBubbles.all.splice(bubblei);
+                //             watcher.record();
+                //             cancelAnimationFrame(that.timer);
+                //         }
+                //     }
+                //
+                //     if (cb < -14) {
+                //         that.el.parentNode.removeChild(that.el);
+                //         cancelAnimationFrame(that.timer);
+                //     } else {
+                //         that.timer = requestAnimationFrame(init);
+                //     }
+                //
+                // });
+            }
+        }
+
+        Bullet.prototype.init = function (){
+            let _gunRect = gun.getBoundingClientRect();
+            this.el = document.createElement('span');
+            this.el.className = 'bullet';
+            let _x = (_gunRect.x || _gunRect.left) + _gunRect.width / 2 - 2;
+            let _y = _gunRect.top - 14;
+            this.el.style.left = _x + 'px'
+            this.el.style.top = _y + 'px'
+            document.body.appendChild(this.el);
+            return this;
+        }
+
+        // 构造气泡
+        const Bubble = function () {
+            this.timer = null;
+            this.el = null;
+
+            this.bg = function () {
+                let r = randomFrom(0, 255);
+                let g = randomFrom(0, 255);
+                let b = randomFrom(0, 255);
+                return 'rgb('+r+', '+g+', '+b+')';
+            }
+
+            this.create = function (x, y, r) {
+                let el = document.createElement('span');
+                el.className = 'bubble';
+                el.style.left = x + 'px'
+                el.style.top = y + 'px'
+                el.style.width = r + 'px';
+                el.style.height = r + 'px';
+                el.style.backgroundColor = this.bg();
+                this.el = el;
+                document.body.appendChild(this.el);
+                return this;
+            }
+        }
+
+        Bubble.prototype.run = function (speed) {
+            let that = this;
+            var speed = speed || 0.1;
+            var winH = window.innerHeight;
+            this.timer = requestAnimationFrame(function go() {
+                let rect = that.el.getBoundingClientRect();
+                let cy = rect.top + 0.1;
+                that.el.style.top = cy + 'px';
+                if(cy > winH) {
+                    that.el.parentNode.removeChild(that.el);
+                    cancelAnimationFrame(that.timer);
+                }else{
+                    requestAnimationFrame(go);
+                }
+            })
+        }
+
+        Bubble.prototype.exploded = function () {
+            this.el.parentNode.removeChild(this.el);
+        }
+
+        const BubbleFactory = function (speed) {
+                this.speed = speed;
+                this.all = [];
+                this.timer;
+
+                this.init = function () {
+                    let that = this;
+                    let winW = window.innerWidth;
+                    let r1 = randomFrom(10, 35);
+                    let x1 = randomFrom(0, winW - r1);
+                    let y1 = 0;
+                    let bubble1 = new Bubble();
+                    bubble1.create(x1, y1, r1);
+                    that.all.push(bubble1);
+                    bubble1.run(10);
+
+                    for(let n = 0; n < 20; n++){
+                        let r = randomFrom(10, 35);
+                        let all = that.all;
+                        let len = all.length;
+                        let _x = 0;
+                        let _y = 0;
+                        let count = 0;
+                        var scopes = [];
+                        if (len == 1) {
+                            let rect1 = all[0].el.getBoundingClientRect();
+                            let _arr = [];
+                            if (winW - rect1.right > r && rect1.x > r) {
+                                _arr.push([0, rect1.x - r])
+                                _arr.push([rect1.right, winW - r]);
+                                let item = _arr[randomFrom(0, 1)];
+                                _x = randomFrom(Math.floor(item[0]), Math.floor(item[1]));
+                            } else if (rect1.x < r) {
+                                _x = randomFrom(Math.floor(rect1.right), winW - r);
+                            } else {
+                                _x = randomFrom(0, Math.floor(rect1.x - r));
+                            }
+                            count++;
+                        } else {
+
+                            let _all = quickSort(all.slice());
+
+                            let rect0 = _all[0].el.getBoundingClientRect();
+                            let rectn = _all[len - 1].el.getBoundingClientRect();
+
+                            if (rect0.x > r) {
+                                scopes.push([0, rect0.x - r]);
+                                count++;
+                            }
+                            if (winW - rectn.right > r) {
+                                scopes.push([rectn.right, winW - r]);
+                                count++;
+                            }
+
+
+                            for (let i = 0; i < len - 1;) {
+                                var j = i + 1;
+                                let recti = _all[i].el.getBoundingClientRect();
+                                let rectj = _all[j].el.getBoundingClientRect();
+
+                                if (rectj.x - recti.right > r) {
+                                    scopes.push([recti.right, rectj.x - r]);
+                                    count++;
+                                }
+                                i++;
+                            }
+                            if (count > 0) {
+                                let item = scopes[randomFrom(0, scopes.length - 1)];
+                                _x = randomFrom(item[0], item[1]);
+                            }
+                        }
+
+                        if (count > 0) {
+                            let bubble = new Bubble();
+                            that.all.push(bubble);
+                            bubble.create(_x, _y, r);
+                            bubble.run(2000);
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            }
+
+        BubbleFactory.prototype.create = function () {
+            let that = this;
+            let winW = window.innerWidth;
+            for(let i = 0; i < 1; i++){
+                let r = randomFrom(10, 35);
+                let _x = randomFrom(0, winW - r);
+                let _y = -r;
+
+                let bubble = new Bubble();
+                that.all.push(bubble);
+                bubble.create(_x, _y, r);
+                bubble.run(that.speed);
+            }
+        }
+
+        // 观察者 （当子弹击中气泡，气泡就爆炸，得分，有气泡触底，则游戏结束）
+        let Watcher = function () {
+            this.score = 0;
+            this.bulletSpeed = -5; // 子弹射击速度
+            this.bulletFre = 1000 // 子弹发射频率
+            this.bubbleSpeed = 10; // 气泡下移速度
+            // 开始游戏
+            this.begin = function () {
+                let that = this;
+                navigator.vibrate([100]);
+
+                let bubbleFty = new BubbleFactory(this.bubbleSpeed);
+
+                bubbleFty.create();
+                setInterval(function() {
+                    bubbleFty.create();
+                }, 1000);
+
+                // 发射子弹
+                setInterval(function(){
+                    let bullet = new Bullet();
+                    bullet.init();
+                    bullet.run(that, bubbleFty);
+                }, that.bulletFre)
+            }
+
+            this.record = function () {
+                this.score += 1;
+                scorer.innerText = this.score;
+            }
+        }
+
+
+        function randomFrom(lowerValue,upperValue){
+            return Math.floor(Math.random() * (upperValue - lowerValue + 1) + lowerValue);
+        }
+
+        // 快速排序
+        function quickSort(arr){
+            if (arr.length <= 1) {return arr;}
+            let pivotIndex = Math.floor(arr.length / 2);
+            let pivot = arr.splice(pivotIndex, 1)[0];
+            let pivotRect = pivot.el.getBoundingClientRect();
+            let left = [];
+            let right = [];
+            for (let i = 0; i < arr.length; i++) {
+                let recti = arr[i].el.getBoundingClientRect();
+                if(recti.x <= pivotRect.x){
+                    left.push(arr[i]);
+                }
+                else{
+                    right.push(arr[i]);
+                }
+            }
+            return quickSort(left).concat([pivot], quickSort(right));
+        }
+    </script>
+</html>
