@@ -21,6 +21,13 @@
                 top: 0;
             }
 
+            #score-box{
+                position: absolute;
+                bottom:5px;
+                left: 5px;
+                z-index: 999;
+            }
+
             #gun{
                 position:absolute;
                 width: 50px;
@@ -59,7 +66,7 @@
     </head>
 
     <body>
-        <p id="score-box">score:<span id="score">0</span></p>
+        <p id="score-box">score：<span id="score">0</span></p>
         <div id="gun"></div>
         <div id="toolbar">
             <button type="button" id="btn-begin">开始</button>
@@ -133,66 +140,41 @@
             this.run = function (watcher, allBubbles) {
                 let that = this;
 
-                this.timer = setInterval(function () {
+                cancelAnimationFrame(this.timer);
+                this.timer = requestAnimationFrame(function init(){
                     let rect = that.el.getBoundingClientRect();
-                        let cx = rect.x;
-                        let cr = rect.right;
-                        let cb = rect.bottom;
-                        let cy = rect.top + watcher.bulletSpeed;
-                        that.el.style.top = cy + 'px';
-
-                        for(let i = 0, len = allBubbles.all.length; i < len; i++) {
-                            let bubblei = allBubbles.all[i];
-                            let _rect = bubblei.el.getBoundingClientRect();
-                            if (cy <= _rect.bottom && cx > _rect.x - 5 && cr < _rect.right + 5) {
-                                console.log('击中！');
-                                bubblei.el.parentNode && bubblei.el.parentNode.removeChild(bubblei.el);
-                                that.el.parentNode && that.el.parentNode.removeChild(that.el);
-                                // allBubbles.all.splice(bubblei);
-                                watcher.record();
-                                clearInterval(that.timer);
-                                break;
-                            }
+                    let cx = rect.x;
+                    let cr = rect.right;
+                    let cb = rect.bottom;
+                    let dy = rect.top;
+                    if(dy == 0){
+                        return;
+                    }
+                    let cy = dy + watcher.bulletSpeed;
+                    that.el.style.top = cy + 'px';
+                
+                    for(let i = 0, len = allBubbles.all.length; i < len; i++) {
+                        let bubblei = allBubbles.all[i];
+                        let _rect = bubblei.el.getBoundingClientRect();
+                
+                        if (cy <= _rect.bottom && cx > _rect.x - 5 && cr < _rect.right + 5) {
+                            bubblei.el.parentNode && bubblei.el.parentNode.removeChild(bubblei.el);
+                            that.el.parentNode && that.el.parentNode.removeChild(that.el);
+                            console.log('击中！');
+                            watcher.record(bubblei);
+                            cancelAnimationFrame(that.timer);
+                            break;
                         }
-
-                        if (cb < -14) {
-                            that.el.parentNode.removeChild(that.el);
-                            clearInterval(that.timer);
-                        }
-                }, 50)
-
-                // cancelAnimationFrame(this.timer);
-                // this.timer = requestAnimationFrame(function init(){
-                //     let rect = that.el.getBoundingClientRect();
-                //     let cx = rect.x;
-                //     let cr = rect.right;
-                //     let cb = rect.bottom;
-                //     let cy = rect.top + watcher.bulletSpeed;
-                //     that.el.style.top = cy + 'px';
-                //
-                //     for(let i = 0, len = allBubbles.all.length; i < len; i++) {
-                //         let bubblei = allBubbles.all[i];
-                //         let _rect = bubblei.el.getBoundingClientRect();
-                //
-                //         if (cy <= _rect.bottom && cx > _rect.x - 5 && cr < _rect.right + 5) {
-                //             console.log(cy <= _rect.bottom, cx > _rect.x - 5, cr < _rect.right + 5);
-                //             bubblei.el.parentNode && bubblei.el.parentNode.removeChild(bubblei.el);
-                //             that.el.parentNode && that.el.parentNode.removeChild(that.el);
-                //             console.log('击中！');
-                //             allBubbles.all.splice(bubblei);
-                //             watcher.record();
-                //             cancelAnimationFrame(that.timer);
-                //         }
-                //     }
-                //
-                //     if (cb < -14) {
-                //         that.el.parentNode.removeChild(that.el);
-                //         cancelAnimationFrame(that.timer);
-                //     } else {
-                //         that.timer = requestAnimationFrame(init);
-                //     }
-                //
-                // });
+                    }
+                
+                    if (cb < -14) {
+                        that.el.parentNode.removeChild(that.el);
+                        cancelAnimationFrame(that.timer);
+                    } else {
+                        that.timer = requestAnimationFrame(init);
+                    }
+                
+                });
             }
         }
 
@@ -212,6 +194,7 @@
         const Bubble = function () {
             this.timer = null;
             this.el = null;
+            this.r = 0;
 
             this.bg = function () {
                 let r = randomFrom(0, 255);
@@ -222,6 +205,7 @@
 
             this.create = function (x, y, r) {
                 let el = document.createElement('span');
+                this.r = r;
                 el.className = 'bubble';
                 el.style.left = x + 'px'
                 el.style.top = y + 'px'
@@ -240,7 +224,7 @@
             var winH = window.innerHeight;
             this.timer = requestAnimationFrame(function go() {
                 let rect = that.el.getBoundingClientRect();
-                let cy = rect.top + 0.1;
+                let cy = rect.top + speed;
                 that.el.style.top = cy + 'px';
                 if(cy > winH) {
                     that.el.parentNode.removeChild(that.el);
@@ -259,84 +243,6 @@
                 this.speed = speed;
                 this.all = [];
                 this.timer;
-
-                this.init = function () {
-                    let that = this;
-                    let winW = window.innerWidth;
-                    let r1 = randomFrom(10, 35);
-                    let x1 = randomFrom(0, winW - r1);
-                    let y1 = 0;
-                    let bubble1 = new Bubble();
-                    bubble1.create(x1, y1, r1);
-                    that.all.push(bubble1);
-                    bubble1.run(10);
-
-                    for(let n = 0; n < 20; n++){
-                        let r = randomFrom(10, 35);
-                        let all = that.all;
-                        let len = all.length;
-                        let _x = 0;
-                        let _y = 0;
-                        let count = 0;
-                        var scopes = [];
-                        if (len == 1) {
-                            let rect1 = all[0].el.getBoundingClientRect();
-                            let _arr = [];
-                            if (winW - rect1.right > r && rect1.x > r) {
-                                _arr.push([0, rect1.x - r])
-                                _arr.push([rect1.right, winW - r]);
-                                let item = _arr[randomFrom(0, 1)];
-                                _x = randomFrom(Math.floor(item[0]), Math.floor(item[1]));
-                            } else if (rect1.x < r) {
-                                _x = randomFrom(Math.floor(rect1.right), winW - r);
-                            } else {
-                                _x = randomFrom(0, Math.floor(rect1.x - r));
-                            }
-                            count++;
-                        } else {
-
-                            let _all = quickSort(all.slice());
-
-                            let rect0 = _all[0].el.getBoundingClientRect();
-                            let rectn = _all[len - 1].el.getBoundingClientRect();
-
-                            if (rect0.x > r) {
-                                scopes.push([0, rect0.x - r]);
-                                count++;
-                            }
-                            if (winW - rectn.right > r) {
-                                scopes.push([rectn.right, winW - r]);
-                                count++;
-                            }
-
-
-                            for (let i = 0; i < len - 1;) {
-                                var j = i + 1;
-                                let recti = _all[i].el.getBoundingClientRect();
-                                let rectj = _all[j].el.getBoundingClientRect();
-
-                                if (rectj.x - recti.right > r) {
-                                    scopes.push([recti.right, rectj.x - r]);
-                                    count++;
-                                }
-                                i++;
-                            }
-                            if (count > 0) {
-                                let item = scopes[randomFrom(0, scopes.length - 1)];
-                                _x = randomFrom(item[0], item[1]);
-                            }
-                        }
-
-                        if (count > 0) {
-                            let bubble = new Bubble();
-                            that.all.push(bubble);
-                            bubble.create(_x, _y, r);
-                            bubble.run(2000);
-                        } else {
-                            break;
-                        }
-                    }
-                }
             }
 
         BubbleFactory.prototype.create = function () {
@@ -358,8 +264,8 @@
         let Watcher = function () {
             this.score = 0;
             this.bulletSpeed = -5; // 子弹射击速度
-            this.bulletFre = 1000 // 子弹发射频率
-            this.bubbleSpeed = 10; // 气泡下移速度
+            this.bulletFre = 500 // 子弹发射频率
+            this.bubbleSpeed = 1; // 气泡下移速度
             // 开始游戏
             this.begin = function () {
                 let that = this;
@@ -380,8 +286,9 @@
                 }, that.bulletFre)
             }
 
-            this.record = function () {
-                this.score += 1;
+            this.record = function (bubble) {
+                // var _score = bubble.r
+                this.score += bubble.r;
                 scorer.innerText = this.score;
             }
         }
