@@ -40,7 +40,7 @@ const Bullet = function () {
             }
 
             if (cb < -14) {
-                that.el.parentNode.removeChild(that.el);
+                document.body.removeChild(that.el);
                 watcher.bullets.splice(bulletIdx, 1);
                 cancelAnimationFrame(that.timer);
             } else {
@@ -51,8 +51,8 @@ const Bullet = function () {
     }
 }
 
-Bullet.prototype.init = function (){
-    let _gunRect = gun.getBoundingClientRect();
+Bullet.prototype.init = function ($gun){
+    let _gunRect = $gun.getBoundingClientRect();
     this.el = document.createElement('span');
     this.el.className = 'bullet';
     let _x = (_gunRect.x || _gunRect.left) + _gunRect.width / 2 - 2;

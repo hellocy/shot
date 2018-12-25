@@ -80,16 +80,12 @@ const Watcher = function () {
         }, 1000);
 
         // 发射子弹
-        this.bulletTimer = setInterval(that.shot, that.bulletFre)
-    }
-
-    this.shot = function () {
-        let bullet = new Bullet();
-        bullet.init();
-        bullet.run(this, this.bubbleFty);
-        console.log(this, 4444444);
-        return;
-        this.bullets.push(bullet);
+        that.bulletTimer = setInterval(function () {
+            let bullet = new Bullet();
+            bullet.init(that.$gun);
+            bullet.run(that, that.bubbleFty);
+            that.bullets.push(bullet);
+        }, that.bulletFre)
     }
 
     this.stop = function () {
@@ -112,13 +108,19 @@ const Watcher = function () {
 
     // 升级难度级别
     this.update = function () {
+        let that = this;
         var newSpeed = this.score / 500;
         this.bubbleFty.speed = newSpeed < 1 ? 1 : newSpeed;
-        this.bulletFre = Math.round(300 - this.bubbleFty.speed * 100)
-
-        clearInterval(this.bulletTimer);
-        this.bulletTimer = setInterval(that.shot, that.bulletFre)
-        console.log(this.bulletFre)
+        this.bulletFre = Math.max(Math.round(300 - this.bubbleFty.speed * 60), 10);
+        console.log(that.bulletFre)
+        clearInterval(that.bulletTimer);
+        // 更新发射子弹速度
+        that.bulletTimer = setInterval(function () {
+            let bullet = new Bullet();
+            bullet.init(that.$gun);
+            bullet.run(that, that.bubbleFty);
+            that.bullets.push(bullet);
+        }, that.bulletFre)
     }
 
     // 重启
