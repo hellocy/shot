@@ -63,4 +63,4 @@ Bullet.prototype.init = function (){
     return this;
 }
 
-module.exports = Bullet
+export default Bullet

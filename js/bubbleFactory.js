@@ -1,3 +1,4 @@
+import util from './util.js';
 import Bubble from './bubble.js';
 
 const BubbleFactory = function () {
@@ -10,8 +11,8 @@ BubbleFactory.prototype.create = function (watcher) {
     let that = this;
     let winW = window.innerWidth;
     for(let i = 0; i < 2; i++){
-        let r = randomFrom(10, 35);
-        let _x = randomFrom(0, winW - r);
+        let r = util.randomFrom(10, 35);
+        let _x = util.randomFrom(0, winW - r);
         let _y = -r;
 
         let bubble = new Bubble();
@@ -21,4 +22,4 @@ BubbleFactory.prototype.create = function (watcher) {
     }
 }
 
-module.exports = BubbleFactory;
+export default BubbleFactory;

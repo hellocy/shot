@@ -122,58 +122,13 @@
     <button type="button" id="btn-restart">重开</button>
 </div>
 </body>
-<script>
+<script type="module">
 
     import Watcher from './js/watcher.js';
 
-    let watcher = new Watcher();
-    console.log(watcher);
-    // watcher.init();
+    const watcher = new Watcher();
+    console.log(watcher, 888)
+    watcher.init();
 
-    function randomFrom(lowerValue,upperValue){
-        return Math.floor(Math.random() * (upperValue - lowerValue + 1) + lowerValue);
-    }
-
-    // 快速排序
-    function quickSort(arr){
-        if (arr.length <= 1) {return arr;}
-        let pivotIndex = Math.floor(arr.length / 2);
-        let pivot = arr.splice(pivotIndex, 1)[0];
-        let pivotRect = pivot.el.getBoundingClientRect();
-        let left = [];
-        let right = [];
-        for (let i = 0; i < arr.length; i++) {
-            let recti = arr[i].el.getBoundingClientRect();
-            if(recti.x <= pivotRect.x){
-                left.push(arr[i]);
-            }
-            else{
-                right.push(arr[i]);
-            }
-        }
-        return quickSort(left).concat([pivot], quickSort(right));
-    }
-
-    function hasClass(ele, cls) {
-        cls = cls || '';
-        if (cls.replace(/\s/g, '').length == 0) return false; //当cls没有参数时，返回false
-        return new RegExp(' ' + cls + ' ').test(' ' + ele.className + ' ');
-    }
-
-    function addClass(ele, cls) {
-        if (!hasClass(ele, cls)) {
-            ele.className = ele.className == '' ? cls : ele.className + ' ' + cls;
-        }
-    }
-
-    function removeClass(ele, cls) {
-        if (hasClass(ele, cls)) {
-            var newClass = ' ' + ele.className.replace(/[\t\r\n]/g, '') + ' ';
-            while (newClass.indexOf(' ' + cls + ' ') >= 0) {
-                newClass = newClass.replace(' ' + cls + ' ', ' ');
-            }
-            ele.className = newClass.replace(/^\s+|\s+$/g, '');
-        }
-    }
 </script>
 </html>

@@ -1,13 +1,14 @@
-// 构造气泡
+import util from './util.js';
+
 const Bubble = function () {
     this.timer = null;
     this.el = null;
     this.r = 0;
 
     this.bg = function () {
-        let r = randomFrom(0, 255);
-        let g = randomFrom(0, 255);
-        let b = randomFrom(0, 255);
+        let r = util.randomFrom(0, 255);
+        let g = util.randomFrom(0, 255);
+        let b = util.randomFrom(0, 255);
         return 'rgb('+r+', '+g+', '+b+')';
     }
 
@@ -53,4 +54,4 @@ Bubble.prototype.exploded = function () {
     this.el.parentNode.removeChild(this.el);
 }
 
-module.exports = Bubble;
+export default Bubble;

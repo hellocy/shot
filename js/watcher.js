@@ -46,7 +46,6 @@ const Watcher = function () {
         that.$gun.ontouchstart = function (e) {
             var that = this;
             var ix = e.touches[0].clientX;
-            console.log(ix)
             var ox = this.getBoundingClientRect().x;
             document.ontouchmove = function (e) {
                 var cx = e.touches[0].clientX;
@@ -81,12 +80,16 @@ const Watcher = function () {
         }, 1000);
 
         // 发射子弹
-        this.bulletTimer = setInterval(function(){
-            let bullet = new Bullet();
-            that.bullets.push(bullet);
-            bullet.init();
-            bullet.run(that, that.bubbleFty);
-        }, that.bulletFre)
+        this.bulletTimer = setInterval(that.shot, that.bulletFre)
+    }
+
+    this.shot = function () {
+        let bullet = new Bullet();
+        bullet.init();
+        bullet.run(this, this.bubbleFty);
+        console.log(this, 4444444);
+        return;
+        this.bullets.push(bullet);
     }
 
     this.stop = function () {
@@ -107,19 +110,23 @@ const Watcher = function () {
         this.$scorer.innerText = this.score;
     }
 
+    // 升级难度级别
     this.update = function () {
-
         var newSpeed = this.score / 500;
         this.bubbleFty.speed = newSpeed < 1 ? 1 : newSpeed;
-        this.bulletFre = Math.round(300 - this.bubbleFty.speed * 50)
+        this.bulletFre = Math.round(300 - this.bubbleFty.speed * 100)
+
+        clearInterval(this.bulletTimer);
+        this.bulletTimer = setInterval(that.shot, that.bulletFre)
         console.log(this.bulletFre)
     }
 
+    // 重启
     this.restart = function () {
         this.score = 0;
-        this.bulletSpeed = -5; // 子弹射击速度
-        this.bulletFre = 300 // 子弹发射频率
-        this.bubbleSpeed = 1; // 气泡下移速度
+        this.bulletSpeed = -5; // 重置子弹射击速度
+        this.bulletFre = 300 // 重置子弹发射频率
+        this.bubbleSpeed = 1; // 重置气泡下移速度
 
         for(let i = 0, len = this.bubbleFty.all.length; i < len; i++){
             cancelAnimationFrame(this.bubbleFty.all[i].timer);
@@ -137,4 +144,4 @@ const Watcher = function () {
     }
 }
 
-module.exports = Watcher
+export default Watcher
