@@ -326,7 +326,7 @@
             // 监听手机Y轴方向的转动，水平移动手杆 #gun
             window.addEventListener('deviceorientation',function (e) {
                 let cx = initLeft + e.gamma * 10;
-                that.$gun.style.left = Math.max(-10, Math.min(cx, hMax - 30 + 10)) + 'px';
+                that.$gun.style.left = Math.max(-10, Math.min(cx, hMax - 30)) + 'px';
             })
         }
 
