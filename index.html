@@ -6,119 +6,18 @@
     <title></title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <style>
-        *{
-            padding:0;
-            margin:0;
-        }
-        html, body{
-            overflow: hidden;
-        }
-
-        #-box{
-            position: absolute;
-            left:0;
-            top: 0;
-        }
-
-        #score-box{
-            position: absolute;
-            bottom:5px;
-            left: 5px;
-            z-index: 999;
-        }
-
-        #gun{
-            position:absolute;
-            width: 30px;
-            height: 20px;
-            left: 50px;
-            bottom: 50px;
-            background:#0B7500;
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
-        }
-        #gun:before{
-            content: '';
-            position: absolute;
-            left: 13px;
-            top: -5px;
-            width: 5px;
-            height: 5px;
-            background: #0B7500;
-        }
-        .bullet{
-            position:absolute;
-            width: 4px;
-            height: 14px;
-            background:saddlebrown;
-            border-radius: 50%;
-        }
-        .bubble{
-            position: absolute;
-            display:inline-block;
-            border-radius: 50%;
-        }
-        .explode{
-            animation: mymove 5s;
-            -webkit-animation: mymove 5s; /*Safari and Chrome*/
-        }
-
-        @keyframes mymove{
-            from {
-                left:0px;
-            }
-            to {left:200px;}
-        }
-
-        @-webkit-keyframes mymove{
-            from {left:0px;}
-            to {left:200px;}
-        }
-        #toolbar{
-            width: 30px;
-            position: absolute;
-            top: 100px;
-            right: 0;
-            height:40px;
-            text-align: center;
-        }
-        #toolbar button{
-            width: 30px;
-            height:50px;
-            margin-top:20px;
-            text-align:center;
-        }
-
-        .score-line{
-            position: absolute;
-            left: 0px;
-            bottom: 49px;
-            width: 100%;
-            height: 1px;
-            background: #0B7500;
-        }
-
-        @keyframes explode {
-            from {
-                transform: scale(1);
-                opacity: 1;
-            }
-            to {
-                transform: scale(2);
-                opacity: 0;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="css/index.css">
 </head>
 
 <body>
-<p id="score-box">score：<span id="score">0</span></p>
+<div class="mask">
+    <button type="button" id="btn-begin">开 始 游 戏</button>
+</div>
+<p id="score-box">得分：<span id="score">0</span></p>
 <div id="gun"></div>
 <div class="score-line"></div>
+<div id="talker">你真棒！继续加油！</div>
 <div id="toolbar">
-    <button type="button" id="btn-begin">开始</button>
-    <button type="button" id="btn-pause">暂停</button>
     <button type="button" id="btn-restart">重开</button>
 </div>
 </body>
@@ -127,7 +26,6 @@
     import Watcher from './js/watcher.js';
 
     const watcher = new Watcher();
-    console.log(watcher, 888)
     watcher.init();
 
 </script>

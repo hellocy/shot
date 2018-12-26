@@ -12,8 +12,14 @@ const Watcher = function () {
     this.bullets = [];
     this.bubbleFty = null;
     this.$gun = document.querySelector("#gun");
+    this.$mask = document.querySelector(".mask");
     this.gunTop = 0;
     this.$scorer = document.querySelector("#score");
+    this.$talker = document.querySelector("#talker");
+    this.isAnimation = false;
+    this.animationFlag = true;
+    this.level = 0;
+    this.oldLevel = 0;
 
     this.init = function () {
         let that = this;
@@ -25,27 +31,30 @@ const Watcher = function () {
         this.$gun.style.left = initLeft + 'px';
 
         let btnStart = document.querySelector('#btn-begin');
-        let btnPause = document.querySelector('#btn-pause');
         let btnRestart = document.querySelector('#btn-restart');
 
         // 开始
         btnStart.addEventListener('click', function(e){
-            that.begin();
+            that.$mask.style.animation = 'maskgo 1s 1s ease-in-out forwards'
+            setTimeout(function(){
+                that.begin();
+            }, 1000)
         })
 
         // 暂停
-        btnPause.addEventListener('click', function(e){
-            cancelAnimationFrame(timer);
-        })
+        // btnPause.addEventListener('click', function(e){
+        //     cancelAnimationFrame(timer);
+        // })
 
         // 重开
         btnRestart.addEventListener('click', function(e){
-            that.restart();
+            location.reload()
         })
 
         that.$gun.ontouchstart = function (e) {
             var that = this;
             var ix = e.touches[0].clientX;
+            console.log(ix)
             var ox = this.getBoundingClientRect().x;
             document.ontouchmove = function (e) {
                 var cx = e.touches[0].clientX;
@@ -56,6 +65,22 @@ const Watcher = function () {
                     document.onmousemove = null
                     document.onmouseup = null
                 }
+            }
+        }
+
+        that.$talker.addEventListener("webkitAnimationEnd",function(){
+            this.style.animation = '';
+            that.isAnimation = false;
+        });
+
+        document.onkeydown = function (e) {
+            let keycode = e.which || e.keyCode;
+            let $gun = that.$gun;
+            let gunRect = $gun.getBoundingClientRect();
+            if (keycode == 37) {
+                $gun.style.left = ((gunRect.x || gunRect.left) - 10) + 'px';
+            }else if(keycode = 39) {
+                $gun.style.left = ((gunRect.x || gunRect.left) + 10) + 'px';
             }
         }
 
@@ -109,12 +134,65 @@ const Watcher = function () {
     // 升级难度级别
     this.update = function () {
         let that = this;
-        var newSpeed = this.score / 500;
-        this.bubbleFty.speed = newSpeed < 1 ? 1 : newSpeed;
-        this.bulletFre = Math.max(Math.round(300 - this.bubbleFty.speed * 60), 10);
-        console.log(that.bulletFre)
-        clearInterval(that.bulletTimer);
+
+        let score = this.score;
+        let speed = 1;
+
+        let talkText = '';
+
+        if(100 < score && score < 200) {
+            that.bulletFre = 280;
+            talkText = '你真棒！继续加油!';
+            this.level = 2;
+        } else if (500 <= score && score < 1000){
+            that.bulletFre = 260;
+            talkText = '干得漂亮！';
+            this.level = 3;
+        } else if (1000 <= score && score < 1500){
+            that.bulletFre = 240;
+            talkText = '真厉害！';
+            this.level = 4;
+        } else if (2500 <= score && score < 3000){
+            that.bulletFre = 200;
+            talkText = '这是高手，这是高手！';
+            this.level = 5;
+        } else if (3000 <= score && score < 3500){
+            that.bulletFre = 180;
+            talkText = '我对你刮目相看啦！';
+            this.level = 6;
+        } else if (3500 <= score && score < 4000){
+            that.bulletFre = 160;
+            talkText = '你简直逆天了啊！';
+            this.level = 7;
+        } else if (4000 <= score && score < 4500){
+            that.bulletFre = 140;
+            talkText = '你已经超越了人类极限！';
+            this.level = 8;
+        } else if (4500 <= score && score < 5000){
+            that.bulletFre = 120;
+            talkText = '天啦，上帝收了他吧！';
+            this.level = 9;
+        } else if (10000 <= score){
+            that.bulletFre = 80;
+            talkText = '宇宙要爆炸啦...';
+            this.level = 10;
+        }
+
+        let newSpeed = speed + Math.floor(score / 500) * 0.1;
+
+        if(!that.isAnimation && that.oldLevel != that.level) {
+            that.isAnimation = true;
+            that.$talker.innerText = talkText;
+            that.$talker.style.animation = 'talktext 3s';
+            that.oldLevel = that.level;
+        }
+
+        that.bubbleFty.speed = newSpeed;
+
+        console.log(that.bulletFre);
+
         // 更新发射子弹速度
+        clearInterval(that.bulletTimer);
         that.bulletTimer = setInterval(function () {
             let bullet = new Bullet();
             bullet.init(that.$gun);
