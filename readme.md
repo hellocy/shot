@@ -8,3 +8,6 @@
 扩展 - 服务代理模式：
 	browser-sync start --proxy "http://your-local-url.com:8080" --files "**"
 
+
+测试地址：<a href="https://hellocy.github.io/shot/">https://hellocy.github.io/shot/</a>
+
