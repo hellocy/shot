@@ -2,7 +2,7 @@
 const Bullet = function () {
     this.timer = null;
     this.el = null;
-    this.run = function (watcher, allBubbles) {
+    this.run = function (watcher, allBubbles, allGatlins) {
         let that = this;
 
         cancelAnimationFrame(this.timer);
@@ -34,6 +34,24 @@ const Bullet = function () {
                     watcher.update();
                     that.el.parentNode && that.el.parentNode.removeChild(that.el);
                     watcher.bullets.splice(bulletIdx, 1);
+                    cancelAnimationFrame(that.timer);
+                    break;
+                }
+            }
+
+            for(let i = 0, len = allGatlins.length; i < len; i++) {
+                let bubblei = allGatlins[i];
+                let _rect = bubblei.el.getBoundingClientRect();
+
+                if (cy <= _rect.bottom && cx > _rect.x - 5 && cr < _rect.right + 5) {
+
+                    cancelAnimationFrame(bubblei.timer);
+                    bubblei.el.style.animation = 'explode 0.3s';
+                    allGatlins.splice(i, 1);
+                    watcher.record(bubblei);
+                    watcher.update();
+                    that.el.parentNode && that.el.parentNode.removeChild(that.el);
+                    watcher.allGatlins.splice(bulletIdx, 1);
                     cancelAnimationFrame(that.timer);
                     break;
                 }

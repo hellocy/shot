@@ -1,25 +1,33 @@
 
+import util from './util.js';
 import Bullet from './bullet.js';
 import BubbleFactory from './bubbleFactory.js';
+import Gatlin from './gatlin.js';
 
 // 观察者 （当子弹击中气泡，气泡就爆炸，得分，有气泡触底，则游戏结束）
 const Watcher = function () {
     this.score = 0;
     this.bulletSpeed = -5; // 子弹射击速度
     this.bulletFre = 300 // 子弹发射频率
+    this.cacheBulletFre = 0;
     this.bubbleSpeed = 1; // 气泡下移速度
     this.bulletTimer = null;
     this.bullets = [];
     this.bubbleFty = null;
-    this.$gun = document.querySelector("#gun");
     this.$mask = document.querySelector(".mask");
+    this.$gun = document.querySelector("#gun");
     this.gunTop = 0;
+    this.$faster = document.querySelector(".faster");
     this.$scorer = document.querySelector("#score");
     this.$talker = document.querySelector("#talker");
     this.isAnimation = false;
     this.animationFlag = true;
     this.level = 0;
     this.oldLevel = 0;
+    this.gatlinTimer = null;
+    this.allGatlins = [];
+
+    this.isOver = false;
 
     this.init = function () {
         let that = this;
@@ -41,11 +49,6 @@ const Watcher = function () {
             }, 1000)
         })
 
-        // 暂停
-        // btnPause.addEventListener('click', function(e){
-        //     cancelAnimationFrame(timer);
-        // })
-
         // 重开
         btnRestart.addEventListener('click', function(e){
             location.reload()
@@ -54,7 +57,6 @@ const Watcher = function () {
         that.$gun.ontouchstart = function (e) {
             var that = this;
             var ix = e.touches[0].clientX;
-            console.log(ix)
             var ox = this.getBoundingClientRect().x;
             document.ontouchmove = function (e) {
                 var cx = e.touches[0].clientX;
@@ -67,6 +69,24 @@ const Watcher = function () {
                 }
             }
         }
+
+        let fnFasterShot = function(e){
+            if(that.isOver){return;}
+            that.cacheBulletFre = that.bulletFre;
+            that.bulletFre = 30;
+            that.updateShot();
+            util.addClass(that.$gun, 'fast')
+            util.removeClass(that.$faster, 'up')
+        }
+
+        that.$faster.addEventListener('touchstart', fnFasterShot)
+
+        that.$faster.addEventListener('touchend', function(e){
+            that.bulletFre = that.cacheBulletFre;
+            that.updateShot();
+            util.removeClass(that.$gun, 'fast');
+            util.addClass(that.$faster, 'up')
+        })
 
         that.$talker.addEventListener("webkitAnimationEnd",function(){
             this.style.animation = '';
@@ -87,7 +107,7 @@ const Watcher = function () {
         // 监听手机Y轴方向的转动，水平移动手杆 #gun
         window.addEventListener('deviceorientation',function (e) {
             let cx = initLeft + e.gamma * 10;
-            that.$gun.style.left = Math.max(-10, Math.min(cx, hMax - 30)) + 'px';
+            that.$gun.style.left = Math.max(-10, Math.min(cx, hMax - 20)) + 'px';
         })
     }
 
@@ -96,21 +116,44 @@ const Watcher = function () {
         let that = this;
         navigator.vibrate([100]);
 
-        this.bubbleFty = new BubbleFactory();
+        // 实例化气泡工厂
+        that.bubbleFty = new BubbleFactory();
 
-        this.bubbleFty.create(that);
-
-        this.bubbleFty.timer = setInterval(function() {
+        // 气泡跑起来
+        that.bubbleFty.create(that);
+        that.bubbleFty.timer = setInterval(function() {
             that.bubbleFty.create(that);
         }, 1000);
 
         // 发射子弹
-        that.bulletTimer = setInterval(function () {
-            let bullet = new Bullet();
-            bullet.init(that.$gun);
-            bullet.run(that, that.bubbleFty);
-            that.bullets.push(bullet);
-        }, that.bulletFre)
+        that.updateShot();
+
+        // 加特林
+        that.gatlinTimer = setInterval(function(){
+            let gatlin = new Gatlin();
+            gatlin.create().run();
+            that.allGatlins.push(gatlin);
+        }, 1000)
+    }
+
+    this.shot = function () {
+        let that = this;
+        let bullet = new Bullet();
+        bullet.init(that.$gun);
+        bullet.run(that, that.bubbleFty, that.allGatlins);
+        that.bullets.push(bullet);
+    }
+
+    this.updateShot = function () {
+        let that = this;
+        clearInterval(that.bulletTimer);
+
+        if(!that.isOver){
+            that.bulletTimer = setInterval(function () {
+                that.shot();
+            }, that.bulletFre)
+        }
+
     }
 
     this.stop = function () {
@@ -124,6 +167,7 @@ const Watcher = function () {
         for (let i = 0, len = bullets.length; i < len; i++) {
             cancelAnimationFrame(bullets[i].timer);
         }
+        this.isOver = true;
     }
 
     this.record = function (bubble) {
@@ -141,15 +185,15 @@ const Watcher = function () {
         let talkText = '';
 
         if(100 < score && score < 200) {
-            that.bulletFre = 280;
+            that.bulletFre = 260;
             talkText = '你真棒！继续加油!';
             this.level = 2;
         } else if (500 <= score && score < 1000){
-            that.bulletFre = 260;
+            that.bulletFre = 240;
             talkText = '干得漂亮！';
             this.level = 3;
         } else if (1000 <= score && score < 1500){
-            that.bulletFre = 240;
+            that.bulletFre = 220;
             talkText = '真厉害！';
             this.level = 4;
         } else if (2500 <= score && score < 3000){
@@ -169,13 +213,13 @@ const Watcher = function () {
             talkText = '你已经超越了人类极限！';
             this.level = 8;
         } else if (4500 <= score && score < 5000){
-            that.bulletFre = 120;
+            that.bulletFre = 100;
             talkText = '天啦，上帝收了他吧！';
             this.level = 9;
         } else if (10000 <= score){
             that.bulletFre = 80;
             talkText = '宇宙要爆炸啦...';
-            this.level = 10;
+            this.level = 50;
         }
 
         let newSpeed = speed + Math.floor(score / 500) * 0.1;
@@ -194,10 +238,7 @@ const Watcher = function () {
         // 更新发射子弹速度
         clearInterval(that.bulletTimer);
         that.bulletTimer = setInterval(function () {
-            let bullet = new Bullet();
-            bullet.init(that.$gun);
-            bullet.run(that, that.bubbleFty);
-            that.bullets.push(bullet);
+            that.shot();
         }, that.bulletFre)
     }
 

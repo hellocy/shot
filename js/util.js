@@ -1,6 +1,6 @@
 export default {
     // 快速排序
-    quickSort: (arr) => {
+    quickSort: function (arr) {
         if (arr.length <= 1) {return arr;}
         let pivotIndex = Math.floor(arr.length / 2);
         let pivot = arr.splice(pivotIndex, 1)[0];
@@ -19,24 +19,24 @@ export default {
         return quickSort(left).concat([pivot], quickSort(right));
     },
 
-    randomFrom: (lowerValue,upperValue) => {
+    randomFrom: function (lowerValue,upperValue) {
         return Math.floor(Math.random() * (upperValue - lowerValue + 1) + lowerValue);
     },
 
-    hasClass: (ele, cls) => {
+    hasClass: function (ele, cls) {
         cls = cls || '';
         if (cls.replace(/\s/g, '').length == 0) return false; //当cls没有参数时，返回false
         return new RegExp(' ' + cls + ' ').test(' ' + ele.className + ' ');
     },
 
-    addClass: (ele, cls) => {
-        if (!hasClass(ele, cls)) {
+    addClass: function (ele, cls) {
+        if (!this.hasClass(ele, cls)) {
             ele.className = ele.className == '' ? cls : ele.className + ' ' + cls;
         }
     },
 
-    removeClass: (ele, cls) => {
-        if (hasClass(ele, cls)) {
+    removeClass: function (ele, cls) {
+        if (this.hasClass(ele, cls)) {
             var newClass = ' ' + ele.className.replace(/[\t\r\n]/g, '') + ' ';
             while (newClass.indexOf(' ' + cls + ' ') >= 0) {
                 newClass = newClass.replace(' ' + cls + ' ', ' ');

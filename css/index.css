@@ -4,6 +4,7 @@
 }
 html, body{
     overflow: hidden;
+    background:#1e282c;
 }
 
 .mask{
@@ -43,7 +44,7 @@ html, body{
     line-height: 43px;
     text-decoration: none;
     opacity:0;
-    animation: btnBegin 2s 1s ease-in-out forwards;
+    animation: btnBegin 1s 0.5s ease-in-out forwards;
 }
 
 @keyframes btnBegin {
@@ -52,34 +53,34 @@ html, body{
         opacity:1;
     }
     10% {
-        margin-top: 60%;
+        margin-top: 50vh;
     }
     20% {
-        margin-top: 50%;
+        margin-top: 40vh;
     }
     30% {
-        margin-top: 60%;
+        margin-top: 50vh;
     }
     40% {
-        margin-top: 54%;
+        margin-top: 44vh;
     }
     50% {
-        margin-top: 60%;
+        margin-top: 50vh;
     }
     60% {
-        margin-top: 56%;
+        margin-top: 46vh;
     }
     70% {
-        margin-top: 60%;
+        margin-top: 50vh;
     }
     80% {
-        margin-top: 58%;
+        margin-top: 48vh;
     }
     90% {
-        margin-top: 60%;
+        margin-top: 50vh;
     }
     100% {
-        margin-top: 60%;
+        margin-top: 50vh;
         opacity:1;
     }
 }
@@ -89,6 +90,7 @@ html, body{
     bottom:13px;
     left: 5px;
     z-index: 999;
+    color:#aaa;
 }
 
 #gun{
@@ -110,6 +112,13 @@ html, body{
     height: 5px;
     background: #0B7500;
 }
+#gun.fast{
+    background:#c12e2a;
+}
+#gun.fast:before{
+    background:#c12e2a;
+}
+
 .bullet{
     position:absolute;
     width: 4px;
@@ -220,4 +229,29 @@ html, body{
         font-size: 12px;
         opacity: 0;
     }
+}
+
+.faster{
+    position: absolute;
+    bottom: 4px;
+    right: 5px;
+    width: 40px;
+    height: 40px;
+    line-height: 45px;
+    border-radius: 50%;
+    background: #985f0d;
+    text-align: center;
+    color:#fff;
+    font-weight: bold;
+    text-shadow: #985f0d;
+
+    -webkit-transition: all 0.1s;
+    -moz-transition: all 0.1s;
+    transition: all 0.1s;
+}
+.faster.up{
+    -webkit-box-shadow: 0px 3px 3px #555;
+    -moz-box-shadow: 0px 3px 3px #555;
+    box-shadow: 0px 3px 3px #555;
+    bottom: 5px;
 }
