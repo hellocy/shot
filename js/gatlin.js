@@ -12,7 +12,7 @@ const Gatlin = function () {
     this.create = function () {
         let el = document.createElement('span');
         let r = util.randomFrom(10, 35);
-
+        let winH = window.innerHeight;
         let txt = document.createTextNode(r);
         let x = util.randomFrom(0, winW - r);
         let y = -r;
@@ -39,8 +39,8 @@ const Gatlin = function () {
 
 Gatlin.prototype.run = function (watcher) {
     let that = this;
-    var speed = 0.1;
-    var winH = window.innerHeight;
+    let speed = 0.1;
+    let winH = window.innerHeight;
     this.timer = requestAnimationFrame(function go() {
         let rect = that.el.getBoundingClientRect();
         let cy = rect.top + speed;
