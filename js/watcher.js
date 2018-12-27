@@ -133,7 +133,7 @@ const Watcher = function () {
             let gatlin = new Gatlin();
             gatlin.create().run();
             that.allGatlins.push(gatlin);
-        }, 1000)
+        }, 3000)
     }
 
     this.shot = function () {
@@ -159,13 +159,18 @@ const Watcher = function () {
     this.stop = function () {
         let bullets = this.bullets;
         let bubbles = this.bubbleFty.all;
+        let allGatlins = this.allGatlins;
         clearInterval(this.bubbleFty.timer);
         clearInterval(this.bulletTimer);
+        clearInterval(this.gatlinTimer);
         for (let i = 0, len = bubbles.length; i < len; i++) {
             cancelAnimationFrame(bubbles[i].timer);
         }
         for (let i = 0, len = bullets.length; i < len; i++) {
             cancelAnimationFrame(bullets[i].timer);
+        }
+        for (let i = 0, len = allGatlins.length; i < len; i++) {
+            cancelAnimationFrame(allGatlins[i].timer);
         }
         this.isOver = true;
     }

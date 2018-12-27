@@ -131,6 +131,14 @@ html, body{
     display:inline-block;
     border-radius: 50%;
 }
+.gatlin{
+    position: absolute;
+    display:inline-block;
+    border-radius: 50%;
+    background: rgb(200, 200, 100);
+    color: #fff;
+    text-align: center;
+}
 .explode{
     animation: mymove 5s;
     -webkit-animation: mymove 5s; /*Safari and Chrome*/

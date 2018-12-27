@@ -11,8 +11,8 @@ const Gatlin = function () {
 
     this.create = function () {
         let el = document.createElement('span');
-        let r = util.randomFrom(10, 35);
-        let winH = window.innerHeight;
+        let r = util.randomFrom(30, 45);
+        let winW = window.innerWidth;
         let txt = document.createTextNode(r);
         let x = util.randomFrom(0, winW - r);
         let y = -r;
@@ -22,9 +22,7 @@ const Gatlin = function () {
         el.style.top = y + 'px'
         el.style.width = r + 'px';
         el.style.height = r + 'px';
-        el.style.backgroundColor = 'rgb(200, 200, 100)';
-        el.style.color = '#fff';
-        el.style.textAlign = 'center';
+        el.style.lineHeight = r + 'px';
 
         this.el = el;
 
@@ -39,7 +37,7 @@ const Gatlin = function () {
 
 Gatlin.prototype.run = function (watcher) {
     let that = this;
-    let speed = 0.1;
+    let speed = 1;
     let winH = window.innerHeight;
     this.timer = requestAnimationFrame(function go() {
         let rect = that.el.getBoundingClientRect();
