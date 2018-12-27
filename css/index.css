@@ -129,6 +129,7 @@ html, body{
 .bubble{
     position: absolute;
     display:inline-block;
+    border: 1px solid orange;
     border-radius: 50%;
 }
 .gatlin{

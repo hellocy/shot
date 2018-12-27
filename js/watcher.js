@@ -51,7 +51,9 @@ const Watcher = function () {
 
         // 重开
         btnRestart.addEventListener('click', function(e){
-            location.reload()
+            // location.reload()
+            that.restart();
+            that.begin();
         })
 
         that.$gun.ontouchstart = function (e) {
@@ -249,24 +251,32 @@ const Watcher = function () {
 
     // 重启
     this.restart = function () {
+        let that = this;
         this.score = 0;
         this.bulletSpeed = -5; // 重置子弹射击速度
         this.bulletFre = 300 // 重置子弹发射频率
         this.bubbleSpeed = 1; // 重置气泡下移速度
 
-        for(let i = 0, len = this.bubbleFty.all.length; i < len; i++){
-            cancelAnimationFrame(this.bubbleFty.all[i].timer);
-            document.body.removeChild(this.bubbleFty.all[i].el);
+        this.$scorer.innerText = 0;
+
+        let bubbleArr = this.bubbleFty.all;
+        let bulletsArr = this.bullets;
+
+        for(let i = 0, len = bubbleArr.length; i < len; i++){
+            cancelAnimationFrame(bubbleArr[i].timer);
+            bubbleArr[i].el.parentNode && bubbleArr[i].el.parentNode.removeChild(bubbleArr[i].el);
         }
-        for(let i = 0, len = this.bullets.length; i < len; i++){
-            cancelAnimationFrame(this.bullets[i].timer);
-            document.body.removeChild(this.bullets[i].el);
+        for(let i = 0, len = bulletsArr.length; i < len; i++){
+            cancelAnimationFrame(bulletsArr[i].timer);
+            bulletsArr[i].el.parentNode && bulletsArr[i].el.parentNode.removeChild(bulletsArr[i].el);
         }
         clearInterval(this.bubbleFty.timer);
         clearInterval(this.bulletTimer);
+        clearInterval(this.gatlinTimer);
 
         this.bubbleFty = null;
         this.bullets = [];
+        that.allGatlins = []
     }
 }
 

@@ -58,7 +58,7 @@ const Bullet = function () {
             }
 
             if (cb < -14) {
-                document.body.removeChild(that.el);
+                that.el.parentNode && that.el.parentNode.removeChild(that.el);
                 watcher.bullets.splice(bulletIdx, 1);
                 cancelAnimationFrame(that.timer);
             } else {
