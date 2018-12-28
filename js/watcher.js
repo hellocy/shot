@@ -2,14 +2,14 @@
 import util from './util.js';
 import Bullet from './bullet.js';
 import BubbleFactory from './bubbleFactory.js';
-import Gatlin from './gatlin.js';
+import Energy from './energy.js';
 
 // 观察者 （当子弹击中气泡，气泡就爆炸，得分，有气泡触底，则游戏结束）
 const Watcher = function () {
     this.score = 0;
     this.bulletSpeed = -5; // 子弹射击速度
     this.bulletFre = 300 // 子弹发射频率
-    this.cacheBulletFre = 0;
+    this.cacheBulletFre = 300;
     this.bubbleSpeed = 1; // 气泡下移速度
     this.bulletTimer = null;
     this.bullets = [];
@@ -20,12 +20,19 @@ const Watcher = function () {
     this.$faster = document.querySelector(".faster");
     this.$scorer = document.querySelector("#score");
     this.$talker = document.querySelector("#talker");
+    this.$energyLine = document.querySelector("#fast-shot-engry");
+    this.energy = 0;
     this.isAnimation = false;
     this.animationFlag = true;
     this.level = 0;
     this.oldLevel = 0;
-    this.gatlinTimer = null;
-    this.allGatlins = [];
+    this.energyTimer = null;
+    this.allEnergy = [];
+    this.winW = window.innerWidth;
+    this.winH = window.innerHeight;
+
+    // 是否按下了快速射击按钮
+    this.isFastShotting = false;
 
     this.isOver = false;
 
@@ -51,7 +58,7 @@ const Watcher = function () {
 
         // 重开
         btnRestart.addEventListener('click', function(e){
-            // location.reload()
+            that.isOver = false;
             that.restart();
             that.begin();
         })
@@ -73,9 +80,11 @@ const Watcher = function () {
         }
 
         let fnFasterShot = function(e){
-            if(that.isOver){return;}
+            console.log(that.energy)
+            if(that.isOver || that.energy <= 0){return;}
             that.cacheBulletFre = that.bulletFre;
             that.bulletFre = 30;
+            that.isFastShotting = true;
             that.updateShot();
             util.addClass(that.$gun, 'fast')
             util.removeClass(that.$faster, 'up')
@@ -85,6 +94,7 @@ const Watcher = function () {
 
         that.$faster.addEventListener('touchend', function(e){
             that.bulletFre = that.cacheBulletFre;
+            that.isFastShotting = false;
             that.updateShot();
             util.removeClass(that.$gun, 'fast');
             util.addClass(that.$faster, 'up')
@@ -130,11 +140,11 @@ const Watcher = function () {
         // 发射子弹
         that.updateShot();
 
-        // 加特林
-        that.gatlinTimer = setInterval(function(){
-            let gatlin = new Gatlin();
-            gatlin.create().run();
-            that.allGatlins.push(gatlin);
+        // 能量包（定时掉落）
+        that.energyTimer = setInterval(function(){
+            let energy = new Energy();
+            energy.create().run();
+            that.allEnergy.push(energy);
         }, 3000)
     }
 
@@ -142,37 +152,44 @@ const Watcher = function () {
         let that = this;
         let bullet = new Bullet();
         bullet.init(that.$gun);
-        bullet.run(that, that.bubbleFty, that.allGatlins);
+        bullet.run(that, that.bubbleFty, that.allEnergy);
         that.bullets.push(bullet);
     }
 
     this.updateShot = function () {
         let that = this;
         clearInterval(that.bulletTimer);
-
         if(!that.isOver){
             that.bulletTimer = setInterval(function () {
+                if(that.isFastShotting && that.energy <= 0){
+                    that.bulletFre = that.cacheBulletFre;
+                    util.removeClass(that.$gun, 'fast');
+                    that.updateShot();
+                }
+                if (that.isFastShotting) {
+                    that.updateEnergy(-0.1);
+                }
                 that.shot();
             }, that.bulletFre)
         }
-
     }
 
+    // 游戏结束
     this.stop = function () {
         let bullets = this.bullets;
         let bubbles = this.bubbleFty.all;
-        let allGatlins = this.allGatlins;
+        let allEnergy = this.allEnergy;
         clearInterval(this.bubbleFty.timer);
         clearInterval(this.bulletTimer);
-        clearInterval(this.gatlinTimer);
+        clearInterval(this.energyTimer);
         for (let i = 0, len = bubbles.length; i < len; i++) {
             cancelAnimationFrame(bubbles[i].timer);
         }
         for (let i = 0, len = bullets.length; i < len; i++) {
             cancelAnimationFrame(bullets[i].timer);
         }
-        for (let i = 0, len = allGatlins.length; i < len; i++) {
-            cancelAnimationFrame(allGatlins[i].timer);
+        for (let i = 0, len = allEnergy.length; i < len; i++) {
+            cancelAnimationFrame(allEnergy[i].timer);
         }
         this.isOver = true;
     }
@@ -183,7 +200,7 @@ const Watcher = function () {
     }
 
     // 升级难度级别
-    this.update = function () {
+    this.updateLevel = function () {
         let that = this;
 
         let score = this.score;
@@ -249,6 +266,15 @@ const Watcher = function () {
         }, that.bulletFre)
     }
 
+    // 更新能量
+    this.updateEnergy = function (energy) {
+        let _rect = this.$energyLine.getBoundingClientRect();
+        let currPercent = (_rect.width / this.winW ) * 100;
+        let newWidth = Math.max(0, Math.min(currPercent + energy, 100));
+        this.$energyLine.style.width = newWidth + '%';
+        this.energy = newWidth;
+    }
+
     // 重启
     this.restart = function () {
         let that = this;
@@ -261,6 +287,7 @@ const Watcher = function () {
 
         let bubbleArr = this.bubbleFty.all;
         let bulletsArr = this.bullets;
+        let allEnergyArr = this.allEnergy;
 
         for(let i = 0, len = bubbleArr.length; i < len; i++){
             cancelAnimationFrame(bubbleArr[i].timer);
@@ -270,13 +297,17 @@ const Watcher = function () {
             cancelAnimationFrame(bulletsArr[i].timer);
             bulletsArr[i].el.parentNode && bulletsArr[i].el.parentNode.removeChild(bulletsArr[i].el);
         }
+        for(let i = 0, len = allEnergyArr.length; i < len; i++){
+            cancelAnimationFrame(allEnergyArr[i].timer);
+            allEnergyArr[i].el.parentNode && allEnergyArr[i].el.parentNode.removeChild(allEnergyArr[i].el);
+        }
         clearInterval(this.bubbleFty.timer);
         clearInterval(this.bulletTimer);
-        clearInterval(this.gatlinTimer);
+        clearInterval(this.energyTimer);
 
         this.bubbleFty = null;
         this.bullets = [];
-        that.allGatlins = []
+        that.allEnergy = []
     }
 }
 

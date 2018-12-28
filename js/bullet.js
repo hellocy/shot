@@ -31,7 +31,7 @@ const Bullet = function () {
                     bubblei.el.style.animation = 'explode 0.3s';
                     allBubbles.all.splice(i, 1);
                     watcher.record(bubblei);
-                    watcher.update();
+                    watcher.updateLevel();
                     that.el.parentNode && that.el.parentNode.removeChild(that.el);
                     watcher.bullets.splice(bulletIdx, 1);
                     cancelAnimationFrame(that.timer);
@@ -40,19 +40,16 @@ const Bullet = function () {
             }
 
             for(let i = 0, len = allGatlins.length; i < len; i++) {
-                let bubblei = allGatlins[i];
-                let _rect = bubblei.el.getBoundingClientRect();
+                let gatlini = allGatlins[i];
+                let _rect = gatlini.el.getBoundingClientRect();
 
                 if (cy <= _rect.bottom && cx > _rect.x - 5 && cr < _rect.right + 5) {
-
-                    cancelAnimationFrame(bubblei.timer);
-                    bubblei.el.style.animation = 'explode 0.3s';
-                    allGatlins.splice(i, 1);
-                    watcher.record(bubblei);
-                    watcher.update();
+                    cancelAnimationFrame(gatlini.timer);
+                    gatlini.el.style.animation = 'explode 0.3s';
+                    watcher.updateEnergy(gatlini.r / 10);
                     that.el.parentNode && that.el.parentNode.removeChild(that.el);
-                    watcher.allGatlins.splice(bulletIdx, 1);
-                    cancelAnimationFrame(that.timer);
+                    watcher.bullets.splice(bulletIdx, 1);
+                    allGatlins.splice(i, 1);
                     break;
                 }
             }

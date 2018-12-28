@@ -4,7 +4,7 @@
 
 import util from './util.js';
 
-const Gatlin = function () {
+const Energy = function () {
     this.timer = null;
     this.el = null;
     this.r = 0;
@@ -17,7 +17,7 @@ const Gatlin = function () {
         let x = util.randomFrom(0, winW - r);
         let y = -r;
 
-        el.className = 'gatlin';
+        el.className = 'energy';
         el.style.left = x + 'px'
         el.style.top = y + 'px'
         el.style.width = r + 'px';
@@ -25,6 +25,7 @@ const Gatlin = function () {
         el.style.lineHeight = r + 'px';
 
         this.el = el;
+        this.r = r;
 
         el.appendChild(txt);
         document.body.appendChild(this.el);
@@ -35,7 +36,7 @@ const Gatlin = function () {
     }
 }
 
-Gatlin.prototype.run = function (watcher) {
+Energy.prototype.run = function (watcher) {
     let that = this;
     let speed = 1;
     let winH = window.innerHeight;
@@ -53,4 +54,4 @@ Gatlin.prototype.run = function (watcher) {
     })
 }
 
-export default Gatlin;
+export default Energy;

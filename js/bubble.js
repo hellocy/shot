@@ -45,6 +45,7 @@ Bubble.prototype.run = function (speed, watcher) {
         }else if (cb > watcher.gunTop - 5) {
             watcher.stop();
             that.el.style.animation = 'over 0.5s infinite';
+            that.el.style.boxShadow = '0 0 10px 3px rgba(255, 255, 255, .8)';
         }else{
             that.timer = requestAnimationFrame(go);
         }
