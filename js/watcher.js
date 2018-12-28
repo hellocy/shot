@@ -80,25 +80,30 @@ const Watcher = function () {
         }
 
         let fnFasterShot = function(e){
-            console.log(that.energy)
+            util.removeClass(that.$faster, 'up')
+
             if(that.isOver || that.energy <= 0){return;}
             that.cacheBulletFre = that.bulletFre;
             that.bulletFre = 30;
             that.isFastShotting = true;
             that.updateShot();
             util.addClass(that.$gun, 'fast')
-            util.removeClass(that.$faster, 'up')
+        }
+
+        let fnFasterShotEnd = function (e) {
+            util.removeClass(that.$gun, 'fast');
+            util.addClass(that.$faster, 'up')
+
+            that.bulletFre = that.cacheBulletFre;
+            that.isFastShotting = false;
+            that.updateShot(); 
         }
 
         that.$faster.addEventListener('touchstart', fnFasterShot)
 
-        that.$faster.addEventListener('touchend', function(e){
-            that.bulletFre = that.cacheBulletFre;
-            that.isFastShotting = false;
-            that.updateShot();
-            util.removeClass(that.$gun, 'fast');
-            util.addClass(that.$faster, 'up')
-        })
+        that.$faster.addEventListener('touchend', fnFasterShotEnd)
+
+        that.$faster.addEventListener('touchcancel', fnFasterShotEnd)
 
         that.$talker.addEventListener("webkitAnimationEnd",function(){
             this.style.animation = '';
@@ -131,7 +136,7 @@ const Watcher = function () {
         // 实例化气泡工厂
         that.bubbleFty = new BubbleFactory();
 
-        // 气泡跑起来
+        // 气泡（定时掉落）
         that.bubbleFty.create(that);
         that.bubbleFty.timer = setInterval(function() {
             that.bubbleFty.create(that);
@@ -145,7 +150,7 @@ const Watcher = function () {
             let energy = new Energy();
             energy.create().run();
             that.allEnergy.push(energy);
-        }, 3000)
+        }, 5000)
     }
 
     this.shot = function () {
@@ -167,7 +172,7 @@ const Watcher = function () {
                     that.updateShot();
                 }
                 if (that.isFastShotting) {
-                    that.updateEnergy(-0.1);
+                    that.updateEnergy(-0.3);
                 }
                 that.shot();
             }, that.bulletFre)
@@ -281,6 +286,7 @@ const Watcher = function () {
         this.score = 0;
         this.bulletSpeed = -5; // 重置子弹射击速度
         this.bulletFre = 300 // 重置子弹发射频率
+        this.cacheBulletFre = 300;
         this.bubbleSpeed = 1; // 重置气泡下移速度
 
         this.$scorer.innerText = 0;
